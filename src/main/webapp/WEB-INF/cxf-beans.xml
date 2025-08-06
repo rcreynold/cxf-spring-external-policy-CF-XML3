@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:sec="http://cxf.apache.org/configuration/security"
+       xsi:schemaLocation="
+          http://www.springframework.org/schema/beans 
+          https://www.springframework.org/schema/beans/spring-beans.xsd
+          http://cxf.apache.org/jaxws 
+          http://cxf.apache.org/schemas/jaxws.xsd
+          http://www.springframework.org/schema/context
+          https://www.springframework.org/schema/context/spring-context.xsd
+          http://cxf.apache.org/configuration/security
+          http://cxf.apache.org/schemas/configuration/security.xsd">
+
+    <context:component-scan base-package="org.example.service"/>
+    <bean id="helloServiceImpl" class="org.example.service.HelloServiceImpl"/>
+
+    <!-- Attach the WS-Security policy to the endpoint -->
+    <jaxws:endpoint id="helloService" implementor="#helloServiceImpl" address="/hello">
+        <jaxws:properties>
+            <entry key="ws-security.policy.input" value="classpath:policy/username_policy.xml"/>
+        </jaxws:properties>
+    </jaxws:endpoint>
+
+    <!-- Simple password callback handler for demo -->
+    <bean id="passwordCallback" class="org.apache.wss4j.common.ext.WSPasswordCallbackHandler">
+        <constructor-arg>
+            <map>
+                <entry key="testuser" value="testpass"/>
+            </map>
+        </constructor-arg>
+    </bean>
+    <bean class="org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor">
+        <constructor-arg>
+            <map>
+                <entry key="passwordCallbackRef" value-ref="passwordCallback"/>
+            </map>
+        </constructor-arg>
+    </bean>
+</beans>
